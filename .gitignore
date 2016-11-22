@@ -1,0 +1,3 @@
+./hls-balance-camera/*.o
+./hls-camera/*.o
+./hls-camera-V7/*.o

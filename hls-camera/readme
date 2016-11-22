@@ -1,0 +1,1 @@
+g++ -g -o check_camera check_camera.cpp  -I /home/gst/CNSROOT/external/lighttpd/lighttpd-1.5.0-r2746/src/  -L/home/gst/CNSROOT/external/lighttpd/lighttpd-1.5.0-r2746/src  -L/home/gst/CNSROOT/build/apps/arts/common/lib/debug -L/home/gst/CNSROOT/build/apps/arts/interfaces/lib/debug  -lfdevent -lsctp -larts_interface -larts_common  -L/home/gst/CNSROOT/build/protobuf/lib -lprotobuf
