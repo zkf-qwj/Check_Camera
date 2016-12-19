@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# arts_darwin     Startup script for the Darwin server
+#
+# chkconfig: 345 85 15
+# description: Darwin Server
+#
+# processname: arts_darwin
+# config: /etc/sysconfig/arts_darwin
+# pidfile: /var/run/arts_darwin.pid
+#
+# Note: pidfile is assumed to be created
+# by arts_darwin (config: server.pid-file).
+# If not, uncomment 'pidof' line.
+
+# Source function library
+. /etc/rc.d/init.d/functions
+
+
+if [ -f /etc/sysconfig/check_camera ]; then
+	. /etc/sysconfig/check_camera
+fi
+
+prog="Check_camera"
+check_camera="/arts/sbin/check_camera"
+#arts_darwin="/arts/sbin/DarwinStreamingServer-zjg-test"
+#arts_darwin_conf_file="/arts/sbin/relay/streamingserver-reflector-555.xml"
+#arts_darwin_conf_file="/etc/streaming/streamingserver-zjg.xml"
+ip_port="192.168.1.22:3000"
+ulimit -c unlimited
+export DAEMON_COREFILE_LIMIT=unlimited
+	
+RETVAL=0
+ARTSUSER="root"
+start() {
+	echo -n $"Starting $prog: "
+        export LD_LIBRARY_PATH="/arts/lib:$LD_LIBRARY_PATH"
+
+#        daemon  --user $ARTSUSER  "/arts/bin/arts_daemonizer $arts_darwin  -c $arts_darwin_conf_file -d >& /var/log/arts/err_arts_darwin.log &"
+        
+        daemon  --user $ARTSUSER  "$check_camera   -p  '/dev/shm/live'  -b $ip_port -t 5   >  /var/log/arts/check_camera.log &"
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog
+	return $RETVAL
+
+}
+
+stop() {
+        echo -n "Stopping $prog: "
+	killproc $check_camera
+
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$prog
+	return $RETVAL
+}
+
+reload() {
+	echo -n $"Reloading $prog: "
+	killproc $check_camera -HUP
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	condrestart)
+		if [ -f /var/lock/subsys/$prog ]; then
+			stop
+			start
+		fi
+		;;
+	reload)
+		reload
+		;;
+	status)
+		status $check_camera
+		RETVAL=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|condrestart|reload|status}"
+		RETVAL=1
+esac
+
+exit $RETVAL
